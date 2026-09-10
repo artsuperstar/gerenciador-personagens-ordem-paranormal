@@ -68,6 +68,33 @@ test('edita e persiste atributos e bônus de perícias', async ({ page }) => {
   await expect(page.getByLabel('Bônus de Acrobacia')).toHaveText('+7')
 })
 
+test('mantém recursos atuais diretos e confirma alterações dos máximos', async ({ page }) => {
+  const panel = page.getByRole('region', { name: 'Recursos' })
+  const currentHitPoints = panel.getByLabel('Pontos de Vida atuais')
+  const maximumHitPoints = panel.locator('input[aria-label="Pontos de Vida máximos"]')
+
+  await expect(currentHitPoints).toBeEditable()
+  await expect(maximumHitPoints).toHaveCount(0)
+
+  await panel.getByRole('button', { name: 'Editar valores máximos dos recursos' }).click()
+  await maximumHitPoints.fill('20')
+  await panel.getByRole('button', { name: 'Salvar' }).click()
+  await expect(panel.getByLabel('Pontos de Vida máximos: 20')).toContainText('20')
+
+  await currentHitPoints.fill('7')
+  await panel.getByRole('button', { name: 'Editar valores máximos dos recursos' }).click()
+  await maximumHitPoints.fill('30')
+  await currentHitPoints.fill('8')
+  await panel.getByRole('button', { name: 'Cancelar' }).click()
+
+  await expect(currentHitPoints).toHaveValue('8')
+  await expect(panel.getByLabel('Pontos de Vida máximos: 20')).toContainText('20')
+
+  await page.reload()
+  await expect(panel.getByLabel('Pontos de Vida atuais')).toHaveValue('8')
+  await expect(panel.getByLabel('Pontos de Vida máximos: 20')).toContainText('20')
+})
+
 for (const viewport of [{ width: 320, height: 700 }, { width: 768, height: 1024 }, { width: 1440, height: 900 }]) {
   test(`não cria rolagem horizontal em ${viewport.width}px`, async ({ page }) => {
     await page.setViewportSize(viewport)

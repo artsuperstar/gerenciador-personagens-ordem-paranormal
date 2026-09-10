@@ -26,3 +26,14 @@ test('menu mobile aberto', async ({ page }) => {
     caret: 'hide',
   })
 })
+
+test('editor de recursos no celular', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/')
+  const panel = page.getByRole('region', { name: 'Recursos' })
+  await panel.getByRole('button', { name: 'Editar valores máximos dos recursos' }).click()
+  await expect(panel).toHaveScreenshot('recursos-edicao-celular.png', {
+    animations: 'disabled',
+    caret: 'hide',
+  })
+})
